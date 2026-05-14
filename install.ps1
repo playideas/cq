@@ -3,11 +3,10 @@
 #  CQ 설치 스크립트 (Windows)
 #
 #  사용법:
-#    irm https://raw.githubusercontent.com/OWNER/REPO/main/install.ps1 | iex
+#    irm https://raw.githubusercontent.com/playideas/cq/main/install.ps1 | iex
 # ============================================================
 param(
-    [string]$Version = "",
-    [switch]$NoService
+    [string]$Version = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -15,7 +14,6 @@ $ErrorActionPreference = "Stop"
 $GithubRepo  = "playideas/cq"
 $ToolName    = "cq"
 $InstallDir  = "$env:ProgramFiles\cq"
-$ServiceName = "CQWorker"
 $Asset       = "${ToolName}-windows-amd64.exe"
 
 # --- 버전 결정 ---
@@ -49,39 +47,6 @@ $MachinePath = [Environment]::GetEnvironmentVariable("Path", "Machine")
 if ($MachinePath -notlike "*$InstallDir*") {
     [Environment]::SetEnvironmentVariable("Path", "$MachinePath;$InstallDir", "Machine")
     Write-Host "  PATH에 $InstallDir 추가됨 (새 터미널에서 적용)"
-}
-
-# --- 서비스 등록 ---
-if ($NoService) {
-    Write-Host "[3/3] 서비스 등록 건너뜀 (-NoService)"
-} else {
-    Write-Host "[3/3] 예약 작업 등록..."
-
-    $Existing = Get-ScheduledTask -TaskName $ServiceName -ErrorAction SilentlyContinue
-    if ($Existing) {
-        Unregister-ScheduledTask -TaskName $ServiceName -Confirm:$false
-    }
-
-    $Action   = New-ScheduledTaskAction -Execute "$InstallDir\$ToolName.exe" -Argument "worker"
-    $Trigger  = New-ScheduledTaskTrigger -AtStartup
-    $Settings = New-ScheduledTaskSettingsSet `
-        -RestartCount 999 `
-        -RestartInterval (New-TimeSpan -Seconds 5) `
-        -AllowStartIfOnBatteries `
-        -DontStopIfGoingOnBatteries `
-        -ExecutionTimeLimit (New-TimeSpan -Days 365)
-    $Principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType S4U -RunLevel Highest
-
-    Register-ScheduledTask `
-        -TaskName $ServiceName `
-        -Action $Action `
-        -Trigger $Trigger `
-        -Settings $Settings `
-        -Principal $Principal | Out-Null
-
-    Start-ScheduledTask -TaskName $ServiceName
-
-    Write-Host "  작업: $ServiceName (부팅 시 자동 시작)"
 }
 
 Write-Host ""

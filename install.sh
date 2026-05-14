@@ -16,13 +16,11 @@ INSTALL_DIR="/usr/local/bin"
 
 # --- 옵션 ---
 VERSION=""
-SKIP_SERVICE=false
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    --version)    VERSION="$2"; shift 2 ;;
-    --no-service) SKIP_SERVICE=true; shift ;;
-    *)            shift ;;
+    --version) VERSION="$2"; shift 2 ;;
+    *)         shift ;;
   esac
 done
 
@@ -78,86 +76,6 @@ if [ -w "$INSTALL_DIR" ]; then
   mv "${TMP}/${TOOL_NAME}" "${INSTALL_DIR}/${TOOL_NAME}"
 else
   sudo mv "${TMP}/${TOOL_NAME}" "${INSTALL_DIR}/${TOOL_NAME}"
-fi
-
-# --- 서비스 등록 함수 ---
-setup_launchd() {
-  local plist_name="com.cq.worker"
-  local plist_file="$HOME/Library/LaunchAgents/${plist_name}.plist"
-  local log_dir="$HOME/.cq/logs"
-
-  mkdir -p "$HOME/Library/LaunchAgents" "$log_dir"
-
-  cat > "$plist_file" <<PLIST
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
-  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-  <key>Label</key>
-  <string>${plist_name}</string>
-  <key>ProgramArguments</key>
-  <array>
-    <string>${INSTALL_DIR}/${TOOL_NAME}</string>
-    <string>worker</string>
-  </array>
-  <key>RunAtLoad</key>
-  <true/>
-  <key>KeepAlive</key>
-  <true/>
-  <key>StandardOutPath</key>
-  <string>${log_dir}/worker.log</string>
-  <key>StandardErrorPath</key>
-  <string>${log_dir}/worker.log</string>
-</dict>
-</plist>
-PLIST
-
-  launchctl bootout "gui/$(id -u)" "$plist_file" 2>/dev/null || true
-  launchctl bootstrap "gui/$(id -u)" "$plist_file"
-
-  echo "  서비스: ${plist_name} (로그인 시 자동 시작)"
-  echo "  로그:   ${log_dir}/worker.log"
-}
-
-setup_systemd() {
-  local service_name="cq-worker"
-  local service_file="/etc/systemd/system/${service_name}.service"
-  local run_user="${SUDO_USER:-$USER}"
-
-  sudo tee "$service_file" > /dev/null <<UNIT
-[Unit]
-Description=CQ Worker
-After=network-online.target
-Wants=network-online.target
-
-[Service]
-ExecStart=${INSTALL_DIR}/${TOOL_NAME} worker
-Restart=always
-RestartSec=5
-User=${run_user}
-
-[Install]
-WantedBy=multi-user.target
-UNIT
-
-  sudo systemctl daemon-reload
-  sudo systemctl enable "$service_name"
-  sudo systemctl restart "$service_name"
-
-  echo "  서비스: ${service_name} (부팅 시 자동 시작)"
-  echo "  로그:   journalctl -u ${service_name} -f"
-}
-
-# --- 서비스 등록 ---
-if [ "$SKIP_SERVICE" = true ]; then
-  echo "[3/3] 서비스 등록 건너뜀 (--no-service)"
-else
-  echo "[3/3] 서비스 등록..."
-  case "$OS" in
-    darwin) setup_launchd ;;
-    linux)  setup_systemd ;;
-  esac
 fi
 
 echo ""
