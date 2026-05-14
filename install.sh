@@ -5,9 +5,8 @@ set -euo pipefail
 #  CQ 설치 스크립트 (macOS / Linux)
 #
 #  사용법:
-#    curl -fsSL https://raw.githubusercontent.com/OWNER/REPO/main/install.sh | bash
+#    curl -fsSL https://raw.githubusercontent.com/playideas/cq/main/install.sh | bash
 #    curl -fsSL ... | bash -s -- --version v1.2.3
-#    curl -fsSL ... | bash -s -- --no-service
 # ============================================================
 
 GITHUB_REPO="playideas/cq"
@@ -60,7 +59,7 @@ echo ""
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 
-echo "[1/3] 바이너리 다운로드..."
+echo "[1/2] 바이너리 다운로드..."
 if command -v curl &>/dev/null; then
   curl -fSL --progress-bar -o "${TMP}/${TOOL_NAME}" "$DOWNLOAD_URL"
 elif command -v wget &>/dev/null; then
@@ -70,7 +69,7 @@ else
 fi
 
 # --- 설치 ---
-echo "[2/3] 바이너리 설치 -> ${INSTALL_DIR}/${TOOL_NAME}"
+echo "[2/2] 바이너리 설치 -> ${INSTALL_DIR}/${TOOL_NAME}"
 chmod +x "${TMP}/${TOOL_NAME}"
 if [ -w "$INSTALL_DIR" ]; then
   mv "${TMP}/${TOOL_NAME}" "${INSTALL_DIR}/${TOOL_NAME}"

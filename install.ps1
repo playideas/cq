@@ -33,12 +33,12 @@ Write-Host "설치: $ToolName $Version (windows/amd64)"
 Write-Host ""
 
 # --- 다운로드 ---
-Write-Host "[1/3] 바이너리 다운로드..."
+Write-Host "[1/2] 바이너리 다운로드..."
 $TmpFile = Join-Path $env:TEMP $Asset
 Invoke-WebRequest -Uri $DownloadUrl -OutFile $TmpFile -UseBasicParsing
 
 # --- 설치 ---
-Write-Host "[2/3] 바이너리 설치 -> $InstallDir\$ToolName.exe"
+Write-Host "[2/2] 바이너리 설치 -> $InstallDir\$ToolName.exe"
 New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
 Move-Item -Force $TmpFile "$InstallDir\$ToolName.exe"
 
