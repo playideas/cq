@@ -11,7 +11,7 @@ set -euo pipefail
 
 GITHUB_REPO="playideas/cq"
 TOOL_NAME="cq"
-INSTALL_DIR="/usr/local/bin"
+INSTALL_DIR="${HOME}/.local/bin"
 
 # --- 옵션 ---
 VERSION=""
@@ -69,15 +69,22 @@ else
 fi
 
 # --- 설치 ---
+mkdir -p "$INSTALL_DIR"
 echo "[2/2] 바이너리 설치 -> ${INSTALL_DIR}/${TOOL_NAME}"
 chmod +x "${TMP}/${TOOL_NAME}"
-if [ -w "$INSTALL_DIR" ]; then
-  mv "${TMP}/${TOOL_NAME}" "${INSTALL_DIR}/${TOOL_NAME}"
-else
-  sudo mv "${TMP}/${TOOL_NAME}" "${INSTALL_DIR}/${TOOL_NAME}"
-fi
+mv "${TMP}/${TOOL_NAME}" "${INSTALL_DIR}/${TOOL_NAME}"
 
 echo ""
 echo "설치 완료!"
 echo "  바이너리: ${INSTALL_DIR}/${TOOL_NAME}"
 echo "  버전 확인: ${TOOL_NAME} --version"
+
+# PATH 안내
+case ":$PATH:" in
+  *":${INSTALL_DIR}:"*) ;;
+  *)
+    echo ""
+    echo "⚠ ${INSTALL_DIR} 이 PATH에 없습니다. 아래 줄을 셸 설정에 추가하세요:"
+    echo "  export PATH=\"\${HOME}/.local/bin:\$PATH\""
+    ;;
+esac
