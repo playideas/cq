@@ -9,19 +9,19 @@ ML 연구원을 위한 GPU 워커 관리 CLI 도구.
 ### macOS / Linux
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/playideas/cq/main/install.sh | bash
+curl -fsSL https://github.com/playideas/cq/releases/latest/download/install.sh | bash
 ```
 
 ### Windows (PowerShell 관리자)
 
 ```powershell
-irm https://raw.githubusercontent.com/playideas/cq/main/install.ps1 | iex
+irm https://github.com/playideas/cq/releases/latest/download/install.ps1 | iex
 ```
 
 ### 특정 버전 설치
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/playideas/cq/main/install.sh | bash -s -- --version v1.0.0b
+curl -fsSL https://github.com/playideas/cq/releases/latest/download/install.sh | bash -s -- --version v1.0.0b
 ```
 
 > 설치 스크립트와 바이너리는 [GitHub Releases](https://github.com/playideas/cq/releases)에서 배포됩니다.
